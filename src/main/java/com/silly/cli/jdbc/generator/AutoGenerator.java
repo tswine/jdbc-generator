@@ -3,7 +3,6 @@ package com.silly.cli.jdbc.generator;
 import com.silly.cli.jdbc.generator.config.DataSourceConfig;
 import com.silly.cli.jdbc.generator.config.GlobalConfig;
 import com.silly.cli.jdbc.generator.config.IDbQuery;
-import com.silly.cli.jdbc.generator.config.StrategyConfig;
 import com.silly.cli.jdbc.generator.config.po.FieldLogicDelete;
 import com.silly.cli.jdbc.generator.config.po.TableField;
 import com.silly.cli.jdbc.generator.config.po.TableInfo;
@@ -17,6 +16,7 @@ import com.silly.cli.jdbc.generator.utils.CollectionUtils;
 import com.silly.cli.jdbc.generator.utils.Constants;
 import com.silly.cli.jdbc.generator.utils.StringUtils;
 import lombok.Data;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
@@ -38,17 +38,13 @@ public class AutoGenerator {
     /**
      * 数据源配置
      */
+    @Setter
     private DataSourceConfig dataSource;
-
-    /**
-     * 生成策略配置
-     */
-    private StrategyConfig strategyConfig;
-
 
     /**
      * 全局配置
      */
+    @Setter
     private GlobalConfig globalConfig;
 
     /**
@@ -102,8 +98,8 @@ public class AutoGenerator {
      */
     private List<TableInfo> getTableInfos() {
         log.info("开始查询数据库中的所有表信息");
-        boolean isInclude = CollectionUtils.isNotEmpty(this.strategyConfig.getIncludeTables());
-        boolean isExclude = CollectionUtils.isNotEmpty(this.strategyConfig.getExcludeTables());
+        boolean isInclude = CollectionUtils.isNotEmpty(this.globalConfig.getIncludeTables());
+        boolean isExclude = CollectionUtils.isNotEmpty(this.globalConfig.getExcludeTables());
         if (isInclude && isExclude) {
             throw new RuntimeException("策略配置中,includeTables与excludeTables为互斥条件，只能配置一项!");
         }
@@ -127,7 +123,7 @@ public class AutoGenerator {
                     //获取注解
                     String tableComment = rs.getString(dbQuery.tableComment());
                     //判断是否需要生成视图
-                    if (this.strategyConfig.isSkipView() && "VIEW".equalsIgnoreCase(tableComment)) {
+                    if (this.globalConfig.isSkipView() && "VIEW".equalsIgnoreCase(tableComment)) {
                         continue;
                     }
                     TableInfo tableInfo = new TableInfo();
@@ -141,7 +137,7 @@ public class AutoGenerator {
         }
         List<TableInfo> globalTableInfos = new ArrayList<>();
         if (isInclude) {
-            String[] includeTables = this.strategyConfig.getIncludeTables();
+            String[] includeTables = this.globalConfig.getIncludeTables();
             for (String includeTable : includeTables) {
                 for (TableInfo tableInfo : tableInfos) {
                     if (tableInfo.getName().equalsIgnoreCase(includeTable)) {
@@ -150,7 +146,7 @@ public class AutoGenerator {
                 }
             }
         } else if (isExclude) {
-            String[] excludeTables = this.strategyConfig.getExcludeTables();
+            String[] excludeTables = this.globalConfig.getExcludeTables();
             for (String excludeTable : excludeTables) {
                 Iterator<TableInfo> iterator = tableInfos.iterator();
                 while (iterator.hasNext()) {
@@ -178,7 +174,7 @@ public class AutoGenerator {
     private List<TableInfo> processTableInfo(List<TableInfo> tableInfos) {
         for (TableInfo tableInfo : tableInfos) {
             //转换实体名称
-            tableInfo.setEntityName(NameStrategy.convertName(tableInfo.getName(), strategyConfig.getTableNameStrategy(), 2));
+            tableInfo.setEntityName(NameStrategy.convertName(tableInfo.getName(), globalConfig.getTableNameStrategy(), 2));
             //转换dao名称
             if (StringUtils.isBlank(globalConfig.getMapperClassNameFormat())) {
                 tableInfo.setMapperName(String.format(Constants.MAPPER_CLASS_NAME_FORMAT, tableInfo.getEntityName()));
@@ -253,7 +249,7 @@ public class AutoGenerator {
                     String type = rs.getString(dbQuery.fieldType());
                     tableField.setType(type);
                     //字段名称
-                    tableField.setFiledName(NameStrategy.convertName(fieldName, strategyConfig.getColumnNameStrategy(), 1));
+                    tableField.setFiledName(NameStrategy.convertName(fieldName, globalConfig.getColumnNameStrategy(), 1));
                     //字段类型
                     tableField.setFiledType(this.dataSource.getTypeConvert().convertType(globalConfig, type));
                     //是否为主键
@@ -284,9 +280,6 @@ public class AutoGenerator {
     private AutoGenerator verify() {
         AssertUtils.notNull(this.dataSource, "数据库配置信息为空");
         this.dataSource.verify();
-        if (this.strategyConfig == null) {
-            this.strategyConfig = new StrategyConfig();
-        }
         if (this.globalConfig == null) {
             this.globalConfig = new GlobalConfig();
         }
@@ -297,16 +290,4 @@ public class AutoGenerator {
         return this;
     }
 
-
-    public void setDataSource(DataSourceConfig dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    public void setGlobalConfig(GlobalConfig globalConfig) {
-        this.globalConfig = globalConfig;
-    }
-
-    public void setStrategyConfig(StrategyConfig strategyConfig) {
-        this.strategyConfig = strategyConfig;
-    }
 }
