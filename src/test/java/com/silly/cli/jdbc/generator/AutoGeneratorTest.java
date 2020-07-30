@@ -3,6 +3,7 @@ package com.silly.cli.jdbc.generator;
 
 import com.silly.cli.jdbc.generator.config.DataSourceConfig;
 import com.silly.cli.jdbc.generator.config.GlobalConfig;
+import com.silly.cli.jdbc.generator.config.rules.DateType;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -33,12 +34,9 @@ public class AutoGeneratorTest {
         globalConfig.setLogicNotDeleteValue(1);
         globalConfig.setLogicDeleteValue(-1);
         globalConfig.setExcludeFields(Arrays.asList("ex1"));
+        globalConfig.setDateType(DateType.TIME_PACK);
         autoGenerator.setGlobalConfig(globalConfig);
 
         autoGenerator.execute();
-
-        //2.主键自增，自动填充： <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER">
-        //            SELECT LAST_INSERT_ID() AS id
-        //        </selectKey>
     }
 }

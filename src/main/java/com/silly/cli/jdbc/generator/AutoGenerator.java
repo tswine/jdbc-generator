@@ -207,7 +207,7 @@ public class AutoGenerator {
         for (TableField field : fields) {
             IFiledType filedType = field.getFiledType();
             if (StringUtils.isNotBlank(filedType.getPkg())) {
-                tableInfo.getImportPackages().add(filedType.getType());
+                tableInfo.getImportPackages().add(filedType.getPkg());
             }
         }
         //开启Lombok注解,需要导入对应注解包

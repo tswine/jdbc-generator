@@ -1,5 +1,6 @@
 package com.silly.cli.jdbc.generator.config;
 
+import com.silly.cli.jdbc.generator.config.rules.DateType;
 import com.silly.cli.jdbc.generator.utils.Constants;
 import lombok.Data;
 
@@ -88,4 +89,9 @@ public class GlobalConfig {
      * 排除字段
      */
     private List<String> excludeFields;
+
+    /**
+     * 时间类型对应策略
+     */
+    private DateType dateType = DateType.ONLY_DATE;
 }
