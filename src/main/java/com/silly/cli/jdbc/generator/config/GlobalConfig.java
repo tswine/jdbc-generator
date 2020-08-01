@@ -24,10 +24,6 @@ public class GlobalConfig {
     private String outputDir;
 
     /**
-     * 是否覆盖已有文件
-     */
-    private boolean fileOverride = false;
-    /**
      * 是否打开输出目录
      */
     private boolean open = true;
