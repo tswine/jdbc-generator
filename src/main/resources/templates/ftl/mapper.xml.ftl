@@ -2,8 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="${globalConfig.parentPacketName}.${globalConfig.mapperPacketName}.${tableInfo.mapperName}">
     <#assign keyParam=""/>
-    <resultMap id="BaseResultMap"
-               type="${globalConfig.parentPacketName}.${globalConfig.entityPacketName}.${tableInfo.entityName}">
+    <resultMap id="BaseResultMap" type="${globalConfig.parentPacketName}.${globalConfig.entityPacketName}.${tableInfo.entityName}">
         <#list tableInfo.fields as field>
             <#if field.keyFlag>
                 <#assign columnFlag="id"/>
@@ -14,15 +13,25 @@
             <${columnFlag} column="${field.name}" property="${field.filedName}"/>
         </#list>
     </resultMap>
-    <#assign keyParam = keyParam?substring(0,keyParam?length-5)/>
+    <#assign keyParam1=""/>
+    <#if keyParam?length gt 0>
+        <#assign keyParam1 = keyParam?substring(0,keyParam?length-5)/>
+    </#if>
     <#assign allColumns="" />
     <#assign allColumnParams="" />
     <#list tableInfo.fields as field>
         <#assign allColumns = allColumns+field.name +","/>
         <#assign allColumnParams = allColumnParams+ "#\{"+field.filedName+"}" +","/>
     </#list>
-    <#assign allColumns= allColumns?substring(0,allColumns?length-1)/>
-    <#assign allColumnParams=allColumnParams?substring(0,allColumnParams?length-1) />
+    <#assign allColumns1="" />
+    <#assign allColumnParams1="" />
+    <#if allColumns?length gt 0>
+        <#assign allColumns1= allColumns?substring(0,allColumns?length-1)/>
+    </#if>
+    <#if allColumnParams?length gt 0>
+        <#assign allColumnParams1=allColumnParams?substring(0,allColumnParams?length-1) />
+    </#if>
+
     <#--是否存在逻辑删除-->
     <#if tableInfo.logicDelete>
         <#assign logicNotDeleteWhere = "AND " + tableInfo.fieldLogicDelete.name + " = " +  tableInfo.fieldLogicDelete.notDeleteValue />
@@ -34,7 +43,7 @@
     </#if>
     <!--所有查询列-->
     <sql id="QUERY_COLUMN_LIST">
-        ${allColumns}
+        ${allColumns1}
     </sql>
 
     <!--根据主键获取实体对象-->
@@ -42,7 +51,7 @@
         SELECT
         <include refid="QUERY_COLUMN_LIST"/>
         FROM ${tableInfo.name}
-        WHERE ${keyParam} ${logicNotDeleteWhere!}
+        WHERE ${keyParam1} ${logicNotDeleteWhere!}
     </select>
 
     <!--通过主键删除数据-->
@@ -52,14 +61,14 @@
     </update>
     <#else>
     <delete id="deleteByPrimaryKey">
-        DELETE FROM ${tableInfo.name} WHERE ${keyParam}
+        DELETE FROM ${tableInfo.name} WHERE ${keyParam1}
     </delete>
     </#if>
 
     <!--插入实体对象-->
     <insert id="insert" parameterType="${globalConfig.parentPacketName}.${globalConfig.entityPacketName}.${tableInfo.entityName}" ${keyAutoIncrementSql!}>
-        INSERT INTO ${tableInfo.name}(${allColumns})
-        VALUES (${allColumnParams})
+        INSERT INTO ${tableInfo.name}(${allColumns1})
+        VALUES (${allColumnParams1})
     </insert>
 
     <!--通过主键更新数据-->
@@ -71,7 +80,7 @@
             <if test="${field.filedName} != null and '' != ${field.filedName}">${field.filedName} = ${conditon}</if>
             </#list>
         </set>
-        WHERE ${keyParam} ${logicNotDeleteWhere!}
+        WHERE ${keyParam1} ${logicNotDeleteWhere!}
     </update>
 
 </mapper>

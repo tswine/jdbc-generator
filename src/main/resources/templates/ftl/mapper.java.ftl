@@ -20,24 +20,30 @@ public interface ${tableInfo.mapperName} {
         <#assign keyAnnotation = keyAnnotation + "* @param "+field.filedName+ " "+ field.comment+"\n"/>
     </#if>
 </#list>
-<#assign keyAnnotation = keyAnnotation?substring(0,keyAnnotation?length-1) />
-<#assign keyParam = keyParam?substring(0,keyParam?length-2) />
+<#assign keyParam1="" />
+<#assign keyAnnotation1="" />
+<#if keyAnnotation?length gt 0>
+    <#assign keyAnnotation1 = keyAnnotation?substring(0,keyAnnotation?length -1) />
+</#if>
+<#if keyParam?length gt 0>
+    <#assign keyParam1 = keyParam?substring(0,keyParam?length-2) />
+</#if>
 
     /**
      * 根据主键获取实体对象
      *
-     ${keyAnnotation}
+     ${keyAnnotation1}
      * @return 获取的实体对象
      */
-    ${tableInfo.entityName} selectByPrimaryKey(${keyParam});
+    ${tableInfo.entityName} selectByPrimaryKey(${keyParam1});
 
     /**
      * 通过主键删除数据
      *
-     ${keyAnnotation}
+     ${keyAnnotation1}
      * @return 数据库受影响行数
      */
-    Integer deleteByPrimaryKey(${keyParam});
+    Integer deleteByPrimaryKey(${keyParam1});
 
     /***
      * 插入实体对象
@@ -49,8 +55,8 @@ public interface ${tableInfo.mapperName} {
     /**
     * 通过主键更新数据
     *
-    ${keyAnnotation}
+    ${keyAnnotation1}
     * @return 数据库受影响行数
     */
-    Integer updateByPrimaryKey(${keyParam});
+    Integer updateByPrimaryKey(${keyParam1});
 }

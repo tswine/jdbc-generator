@@ -162,7 +162,7 @@ public class AutoGenerator {
         }
         //获取表字段信息
         globalTableInfos.forEach(k -> getTableFields(k));
-        return processTableInfo(tableInfos);
+        return processTableInfo(globalTableInfos);
     }
 
     /**
